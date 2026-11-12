@@ -1,0 +1,15 @@
+---
+# Cluster kind único: faz o papel de plataforma (Kratix) e de destino dev.
+# Versões e motivos no README.md da raiz.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: plataforma
+networking:
+  # Porta fixa para o endereço da API não mudar quando o cluster for recriado
+  # (o plugin Kubernetes do Backstage usa https://127.0.0.1:6443).
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 6443
+nodes:
+  - role: control-plane
+    # Kubernetes 1.36.4, imagem pré-construída para o kind v0.33.0 (amd64 e arm64).
+    image: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
