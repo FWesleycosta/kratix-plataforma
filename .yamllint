@@ -1,0 +1,11 @@
+---
+extends: default
+
+rules:
+  # A imagem do nó fixada por digest passa de 80 colunas.
+  line-length:
+    max: 120
+
+# Cópia do upstream: não se formata à mão, só se substitui inteira.
+ignore: |
+  manifests/kratix/kratix.yaml
