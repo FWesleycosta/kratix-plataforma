@@ -6,6 +6,7 @@ rules:
   line-length:
     max: 120
 
-# Cópia do upstream: não se formata à mão, só se substitui inteira.
+# Cópias do upstream: não se formatam à mão, só se substituem inteiras.
 ignore: |
   manifests/kratix/kratix.yaml
+  manifests/argocd/install/core-install.yaml

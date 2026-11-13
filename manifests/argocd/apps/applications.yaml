@@ -1,0 +1,86 @@
+---
+# Os dois repositórios são públicos: o Argo CD lê por HTTPS, sem credencial.
+# Sync automático, com prune (apagar o arquivo apaga no cluster) e selfHeal.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kratix-pedidos
+  namespace: argocd
+spec:
+  project: kratix-pedidos
+  source:
+    repoURL: https://github.com/FWesleycosta/kratix-pedidos.git
+    targetRevision: main
+    path: pedidos
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+---
+# Dependências da Destination dev (o que o Promise instala: CRDs, Namespaces).
+# Fica separada dos recursos para as CRDs entrarem antes de quem depende delas.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kratix-dev-dependencies
+  namespace: argocd
+spec:
+  project: kratix-state-store
+  source:
+    repoURL: https://github.com/FWesleycosta/kratix-state-store.git
+    targetRevision: main
+    path: destinations/dev/dependencies
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+---
+# Recursos da Destination dev (o que cada pedido gera).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kratix-dev-resources
+  namespace: argocd
+spec:
+  project: kratix-state-store
+  source:
+    repoURL: https://github.com/FWesleycosta/kratix-state-store.git
+    targetRevision: main
+    path: destinations/dev/resources
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

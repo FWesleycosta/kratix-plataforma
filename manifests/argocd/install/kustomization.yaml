@@ -1,0 +1,32 @@
+---
+# Argo CD v3.6.1 em modo core (sem servidor de API e sem interface web).
+# A cópia do upstream não se edita: versão, digest e réplicas mudam aqui.
+# Versões, hashes e como atualizar no README.md da raiz.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  - namespace.yaml
+  - core-install.yaml
+
+# Índices multiarquitetura (amd64 e arm64), conferidos em 2026-11-13.
+# O tag fica junto do digest só para leitura; quem vale é o digest.
+images:
+  - name: quay.io/argoproj/argocd
+    newTag: v3.6.1@sha256:296e3d74f449b2ce45265613fcb68c18ed7366488360c8ea32f5f2a93d2e5c54
+  - name: public.ecr.aws/docker/library/redis
+    newTag: 8.10.1-alpine@sha256:ef216d85ec44f4fdf7c0e6df2d1757a4734ed32fbb278cabd3181b5a27353b79
+
+patches:
+  # O ensaio não usa ApplicationSet: o controlador fica parado para poupar memória.
+  # Para religar, apague este patch (o CRD continua instalado).
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: argocd-applicationset-controller
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 0

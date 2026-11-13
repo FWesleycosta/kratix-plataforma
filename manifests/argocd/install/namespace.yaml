@@ -1,0 +1,6 @@
+---
+# O core-install.yaml do Argo CD não traz o Namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd

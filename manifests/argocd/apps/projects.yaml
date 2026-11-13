@@ -1,0 +1,42 @@
+---
+# Pedidos: commit sem revisão humana, então é a porta mais exposta.
+# Só recursos com namespace, só no namespace default, nenhum recurso de cluster.
+# No passo 5 (Promise app) a lista de recursos fica restrita ao grupo do Promise.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kratix-pedidos
+  namespace: argocd
+spec:
+  description: Pedidos (Resource Requests) do Kratix, gravados no repositório kratix-pedidos
+  sourceRepos:
+    - https://github.com/FWesleycosta/kratix-pedidos.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: default
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+# State Store: só o Kratix escreve no repositório. Recursos de cluster liberados,
+# porque as dependências de um Promise trazem CRD e Namespace (e o canário do Kratix
+# cria o Namespace kratix-worker-system).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kratix-state-store
+  namespace: argocd
+spec:
+  description: O que o Kratix grava no repositório kratix-state-store para a Destination dev
+  sourceRepos:
+    - https://github.com/FWesleycosta/kratix-state-store.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
