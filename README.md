@@ -123,6 +123,20 @@ demais para o apply comum): `kubectl apply -k manifests/argocd/install --server-
 
 ## Memória (Docker Desktop com 4 GB)
 
-Estimativa do passo 3 (nó do kind, cert-manager e Kratix): de 0,8 a 1,2 GiB.
-Com o Argo CD core do passo 4 (3 pods, ApplicationSet em 0): de 1,3 a 1,55 GiB.
-Valores medidos: a preencher.
+O limite do contêiner no `docker stats` é 3,813 GiB (os 4 GB do Docker Desktop).
+
+Estimativa do passo 3 (nó do kind, cert-manager e Kratix): de 0,8 a 1,2 GiB. Não foi medida.
+Estimativa do passo 4 (com o Argo CD core, 3 pods e ApplicationSet em 0): cerca de 1,7 GiB.
+A estimativa anterior, de 1,3 a 1,55 GiB, ficou abaixo do medido.
+
+Medido em 2026-11-13, com `docker stats --no-stream plataforma-control-plane`, no cluster com
+cert-manager, Kratix, Argo CD core v3.6.1, GitStateStore, Destination `dev` e 3 Applications
+Synced/Healthy com o canário aplicado:
+
+| Momento | Memória | CPU |
+|---|---|---|
+| Logo depois da instalação (pico) | 1,718 GiB (45,06%) | 25,93% |
+| Cerca de 5 minutos depois, em repouso | 1,67 GiB (43,79%) | 26,34% |
+
+A CPU do `docker stats` é porcentagem de um núcleo: cerca de 26% estável é o repouso do control plane.
+Sobram cerca de 2 GiB no Docker para os próximos passos. O Backstage roda fora do Docker, no Mac.
