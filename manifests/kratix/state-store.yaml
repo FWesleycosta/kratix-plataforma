@@ -1,0 +1,42 @@
+---
+# State Store no repositório público kratix-state-store, escrito por deploy key SSH
+# (escrita só nesse repositório). O Secret kratix-state-store-git (chaves sshPrivateKey
+# e knownHosts) é criado à mão no cluster e nunca vai para o Git.
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: github
+spec:
+  url: git@github.com:FWesleycosta/kratix-state-store.git
+  branch: main
+  path: destinations
+  authMethod: ssh
+  secretRef:
+    name: kratix-state-store-git
+    namespace: kratix-platform-system
+  # A CRD assume true quando o campo fica vazio (sem verificar TLS). Só vale para
+  # HTTPS, mas fica explícito para não virar armadilha numa troca de método.
+  insecure: false
+---
+# Destination dev: o próprio cluster kind-plataforma. O Kratix grava em
+# destinations/dev/dependencies e destinations/dev/resources, que o Argo CD aplica.
+apiVersion: platform.kratix.io/v1alpha1
+kind: Destination
+metadata:
+  name: dev
+  labels:
+    environment: dev
+spec:
+  path: dev
+  stateStoreRef:
+    name: github
+    kind: GitStateStore
+  strictMatchLabels: false
+  # Imutável depois de criado.
+  filepath:
+    mode: nestedByMetadata
+  cleanup: none
+  # Canário: Namespace kratix-worker-system e ConfigMap kratix-info. Quando o Argo CD
+  # os aplica, a volta completa (Kratix → Git → Argo CD → cluster) está confirmada.
+  initWorkloads:
+    enabled: true
